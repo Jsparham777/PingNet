@@ -33,7 +33,7 @@
         <TextBlock Grid.Row="0"
                    FontFamily="Consolas"
                    Foreground="GhostWhite"
-                   FontWeight="DemiBold">
+                   FontWeight="Regular">
             <Run Text="Searching IP range: "/>
             <Run Text="{Binding IPAddressRange}"/>
             <Run Text=".XXX"/>
@@ -69,8 +69,8 @@
 
         <TextBlock Name="TextBlockStatus"
                    Grid.Row="2"
-                   Text="{Binding Searching, Converter={StaticResource BoolToStringConverters}, NotifyOnTargetUpdated=True, FallbackValue='Finished!'}"
-                   FontWeight="Light"
+                   Text="{Binding Searching, Converter={StaticResource BoolToStringConverters}, NotifyOnTargetUpdated=True, FallbackValue='Searching'}"
+                   FontWeight="Regular"
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    FontSize="20"
@@ -83,7 +83,8 @@
                                              Storyboard.TargetProperty="Opacity" 
                                              From="0" 
                                              To="1"
-                                             Duration="0:0:0.5"/>
+                                             RepeatBehavior="Forever"
+                                             Duration="0:0:1"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>

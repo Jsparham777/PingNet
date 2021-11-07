@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace PingNet.ViewModels
 {
@@ -18,12 +15,9 @@ namespace PingNet.ViewModels
     /// </summary>
     public class MainWindowViewModel : BaseViewModel
     {
-        private readonly BackgroundWorker _backgroundWorker = new();
-        private readonly List<string> _ipAddresses = new();
         private readonly AppSettings _options;
         private ObservableCollection<string> _discoveredMachines = new();
-        private bool _searching = false;
-        private bool _searchComplete = false;
+        private bool _searching;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -31,7 +25,6 @@ namespace PingNet.ViewModels
         /// <param name="options">Options read from the appsettings.json file.</param>
         public MainWindowViewModel(IOptions<AppSettings> options)
         {
-            _backgroundWorker.DoWork += BackgroundWorker_DoWork;
             _options = options.Value;
             IPAddressRange = _options.IPAddressRange;
         }
@@ -39,18 +32,21 @@ namespace PingNet.ViewModels
         /// <summary>
         /// Discover command.
         /// </summary>
-        public RelayCommand Discover { get { return new RelayCommand(x => ExecuteDiscover()); } }
-        
+        public RelayCommand Discover => new(async x => await ExecuteDiscover());
+
         /// <summary>
         /// Connect command.
         /// </summary>
-        public RelayCommand Connect { get { return new RelayCommand(x => ExecuteConnect(x)); } }
-        
+        public static RelayCommand Connect => new(x => ExecuteConnect(x));
+
         /// <summary>
         /// Exit command.
         /// </summary>
-        public static RelayCommand Exit { get { return new RelayCommand(x => { Application.Current.Shutdown(); }); } }
+        public static RelayCommand Exit => new(x => { Application.Current.Shutdown(); });
 
+        /// <summary>
+        /// The IP address range.
+        /// </summary>
         public string IPAddressRange { get; set; }
 
         /// <summary>
@@ -82,31 +78,68 @@ namespace PingNet.ViewModels
         /// <summary>
         /// Starts the discovery background worker.
         /// </summary>
-        private void ExecuteDiscover()
+        private async Task ExecuteDiscover()
         {
-
-
-
-
-
-
-            _discoveredMachines.Clear();
-            
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += DispatcherTimer_Tick;
-            timer.Start();
-
-            _backgroundWorker.RunWorkerAsync();
+            DiscoveredMachines.Clear();
+            await BroadcastAsync();
         }
 
+        /// <summary>
+        /// Pings all IP addresses within a given range and adds the connected machines to the <see cref="DiscoveredMachines"/> collection.
+        /// </summary>
+        private async Task BroadcastAsync()
+        {
+            Searching = true;
+
+            var addresses = ConstructAddresses(_options.IPAddressRange);
+
+            var replies = await PingAsync(addresses);
+
+            foreach (var reply in replies)
+            {
+                DiscoveredMachines.Add(FormatAddress(reply));
+            }
+
+            Searching = false;
+        }
 
         /// <summary>
-        /// TEST
+        /// Formats a reply's IP address, appending the host name.
         /// </summary>
-        /// <param name="ips"></param>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
+        /// <param name="reply">The <see cref="PingReply"/> to format.</param>
+        /// <returns>The formatted IP address with appended host name.</returns>
+        private static string FormatAddress(PingReply reply)
+        {
+            var hostname = Dns.GetHostEntry(reply.Address).HostName.Replace(".Home", "");
+
+            var entry = $"{reply.Address} - {hostname}";
+
+            return entry;
+        }
+
+        /// <summary>
+        /// Constructs a list of all possible IP addresses within a given range. (last octet 0 to 255)
+        /// </summary>
+        /// <param name="range">The first three octets of an IP address.</param>
+        /// <returns>The IP address list.</returns>
+        private static List<IPAddress> ConstructAddresses(string range)
+        {
+            List<IPAddress> addresses = new();
+
+            for (int i = 0; i < 256; i++)
+            {
+                addresses.Add(IPAddress.Parse($"{range}.{i}"));
+            }
+
+            return addresses;
+        }
+
+        /// <summary>
+        /// Pings all given IP addresses and awaits a successful reply.
+        /// </summary>
+        /// <param name="ips">IP address list.</param>
+        /// <param name="timeout">Ping timeout.</param>
+        /// <returns>A list of successfully ping'd IP addresses.</returns>
         public static async Task<List<PingReply>> PingAsync(List<IPAddress> ips, int timeout = 5000)
         {
             var pingTasks = ips.Select(async ip =>
@@ -120,75 +153,6 @@ namespace PingNet.ViewModels
             return results.Where(x => x.Status == IPStatus.Success).ToList();
         }
 
-        private async Task DoWork()
-        {
-            string ipRange = _options.IPAddressRange;
-
-            for (int i = 0; i < 256; i++)
-            {
-                _ipAddresses.Add($"{ipRange}.{i}");
-            }
-
-
-
-        }
-
-
-        /// <summary>
-        /// Pings all IP addresses within a given range and adds the connected machines to the <see cref="DiscoveredMachines"/> collection.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            _searchComplete = false;
-            string ipRange = _options.IPAddressRange;
-
-            for (int i = 0; i < 256; i++)
-            {
-                _ipAddresses.Add($"{ipRange}.{i}");
-            }
-
-            Parallel.For(0, _ipAddresses.Count(), (i, loopState) =>
-            {
-                var ping = new Ping();
-                var pingReply = ping.Send(_ipAddresses[i].ToString());
-
-                if (pingReply.Status == IPStatus.Success)
-                {
-                    var address = pingReply.Address.ToString();
-
-                    Application.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        if (pingReply.Status == IPStatus.Success)
-                        {
-                            var address = pingReply.Address.ToString();
-                            var hostname = Dns.GetHostEntry(pingReply.Address).HostName;
-
-                            var host = hostname.Replace(".Home", "");
-
-                            var entry = $"{address} - {host}";
-                            // Lock here. This isn't thread safe
-                            lock (_lock)
-                            {
-                                if(!DiscoveredMachines.Contains(entry))
-                                    DiscoveredMachines.Add(entry);
-                            }
-                        }
-                    });
-                }
-            });
-          
-            _searchComplete = true;
-        }
-
-        private readonly object _lock = new object();
-
-        private void DispatcherTimer_Tick(object sender, System.EventArgs e)
-        {
-            Searching = _searchComplete == false ? true : false;
-        }
-
         /// <summary>
         /// Starts the RDP session in full screen mode.
         /// </summary>
@@ -197,7 +161,7 @@ namespace PingNet.ViewModels
             string entry = parameter as string;
             string ip = entry.Split(" - ")[0];
 
-            Process.Start(new ProcessStartInfo("mstsc", $"/f /v:{ip}"));
-        }  
+            _ = Process.Start(new ProcessStartInfo("mstsc", $"/f /v:{ip}"));
+        }
     }
 }
