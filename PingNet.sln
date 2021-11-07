@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingNet", "PingNet\PingNet.csproj", "{7C799267-52E4-482C-A26F-33783337BFA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C799267-52E4-482C-A26F-33783337BFA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C799267-52E4-482C-A26F-33783337BFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C799267-52E4-482C-A26F-33783337BFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C799267-52E4-482C-A26F-33783337BFA5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F874923-98DB-451E-8C76-608A22A7A33E}
+	EndGlobalSection
+EndGlobal

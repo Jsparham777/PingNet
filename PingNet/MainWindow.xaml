@@ -1,0 +1,102 @@
+﻿<Window x:Class="PingNet.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:PingNet.ValueConverters"
+        xmlns:local="clr-namespace:PingNet"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Title="PingNet" 
+        Height="330" 
+        Width="600"
+        ResizeMode="NoResize"
+        MouseDown="Window_MouseDown"
+        DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}">
+    <Window.Background>
+        <ImageBrush ImageSource="background.jpg"/>
+    </Window.Background>
+
+    <Grid Margin="10">
+        <Grid.Resources>
+            <converters:BoolToInverseBoolConverter x:Key="BoolToInverseBoolConverters"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverters"/>
+        </Grid.Resources>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   FontFamily="Consolas"
+                   Foreground="GhostWhite"
+                   FontWeight="DemiBold">
+            <Run Text="Searching IP range: "/>
+            <Run Text="{Binding IPAddressRange}"/>
+            <Run Text=".XXX"/>
+        </TextBlock>
+
+        <ListView x:Name="ListViewAddresses" 
+                  Grid.Row="1" 
+                  Height="auto"
+                  Background="Transparent"
+                  ItemsSource="{Binding DiscoveredMachines}"
+                  FontFamily="Consolas"
+                  FontSize="14"
+                  FontWeight="DemiBold"
+                  Foreground="GhostWhite">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Connect"
+                              Command="{Binding Connect}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+        </ListView>
+
+        <Button x:Name="ButtonPing"
+                Grid.Row="2"
+                Margin="0 10 0 0"
+                Content="Find machines"
+                Height="30"
+                Width="100"
+                IsEnabled="{Binding Searching, Converter={StaticResource BoolToInverseBoolConverters}}"
+                HorizontalAlignment="Left"
+                Command="{Binding Discover}"/>
+
+        <TextBlock Name="TextBlockStatus"
+                   Grid.Row="2"
+                   Text="{Binding Searching, Converter={StaticResource BoolToStringConverters}, NotifyOnTargetUpdated=True, FallbackValue='Finished!'}"
+                   FontWeight="Light"
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"
+                   FontSize="20"
+                   Foreground="GhostWhite">
+            <TextBlock.Triggers>
+                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="TextBlockStatus"
+                                             Storyboard.TargetProperty="Opacity" 
+                                             From="0" 
+                                             To="1"
+                                             Duration="0:0:0.5"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </TextBlock.Triggers>
+        </TextBlock>
+        
+        <Button x:Name="ButtonExit"
+                Grid.Row="2"
+                Margin="0 10 0 0"
+                Content="Exit"
+                Height="30"
+                Width="100"
+                HorizontalAlignment="Right"
+                Command="{Binding Exit}"/>
+    </Grid>
+</Window>
