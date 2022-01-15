@@ -59,8 +59,11 @@
                   Foreground="GhostWhite">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Connect"
+                    <MenuItem Header="Connect via RDP"
                               Command="{Binding Connect}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
+                    <MenuItem Header="Browse to..."
+                              Command="{Binding Browse}"
                               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"/>
                 </ContextMenu>
             </ListView.ContextMenu>

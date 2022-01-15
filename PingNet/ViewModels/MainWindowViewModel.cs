@@ -40,6 +40,11 @@ namespace PingNet.ViewModels
         public static RelayCommand Connect => new(x => ExecuteConnect(x));
 
         /// <summary>
+        /// Browse command.
+        /// </summary>
+        public RelayCommand Browse => new(x => ExecuteBrowse(x));
+
+        /// <summary>
         /// Exit command.
         /// </summary>
         public static RelayCommand Exit => new(x => { Application.Current.Shutdown(); });
@@ -107,12 +112,25 @@ namespace PingNet.ViewModels
         /// <summary>
         /// Starts the RDP session in full screen mode.
         /// </summary>
+        /// <param name="parameter">The hostname and IP address.</param>
         private static void ExecuteConnect(object parameter)
         {
             string entry = parameter as string;
             string ip = entry.Split(" - ")[0];
 
             _ = Process.Start(new ProcessStartInfo("mstsc", $"/f /v:{ip}"));
+        }
+
+        /// <summary>
+        /// Opens a browser and navigates to the url.
+        /// </summary>
+        /// <param name="parameter">The hostname and IP address.</param>
+        private void ExecuteBrowse(object parameter)
+        {
+            string entry = parameter as string;
+            string ip = entry.Split(" - ")[0];
+
+            Process.Start(_options.BrowserPath, $"http://{ip}");
         }
     }
 }
