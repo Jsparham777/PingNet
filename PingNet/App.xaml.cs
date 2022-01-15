@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PingNet.Services;
 using PingNet.ViewModels;
 using System;
 using System.Windows;
@@ -53,7 +54,7 @@ namespace PingNet
             services.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)));
 
             //Register services
-
+            services.AddSingleton<INetworkAnalyser, NetworkAnalyser>();
 
             //Register viewmodels
             services.AddTransient<MainWindowViewModel>();

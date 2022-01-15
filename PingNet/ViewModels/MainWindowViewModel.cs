@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
-using System.Collections.Generic;
+using PingNet.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -16,6 +13,7 @@ namespace PingNet.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly AppSettings _options;
+        private readonly INetworkAnalyser _networkAnalyser;
         private ObservableCollection<string> _discoveredMachines = new();
         private bool _searching;
 
@@ -23,10 +21,11 @@ namespace PingNet.ViewModels
         /// Instantiates a new instance of the <see cref="MainWindowViewModel"/> class.
         /// </summary>
         /// <param name="options">Options read from the appsettings.json file.</param>
-        public MainWindowViewModel(IOptions<AppSettings> options)
+        public MainWindowViewModel(IOptions<AppSettings> options, INetworkAnalyser networkAnalyser)
         {
             _options = options.Value;
             IPAddressRange = _options.IPAddressRange;
+            _networkAnalyser = networkAnalyser;
         }
 
         /// <summary>
@@ -81,76 +80,12 @@ namespace PingNet.ViewModels
         private async Task ExecuteDiscover()
         {
             DiscoveredMachines.Clear();
-            await BroadcastAsync();
-        }
 
-        /// <summary>
-        /// Pings all IP addresses within a given range and adds the connected machines to the <see cref="DiscoveredMachines"/> collection.
-        /// </summary>
-        private async Task BroadcastAsync()
-        {
             Searching = true;
 
-            var addresses = ConstructAddresses(_options.IPAddressRange);
-
-            var replies = await PingAsync(addresses);
-
-            foreach (var reply in replies)
-            {
-                DiscoveredMachines.Add(FormatAddress(reply));
-            }
-
+            DiscoveredMachines = new ObservableCollection<string>(await _networkAnalyser.BroadcastAsync(IPAddressRange, 1000));
+            
             Searching = false;
-        }
-
-        /// <summary>
-        /// Formats a reply's IP address, appending the host name.
-        /// </summary>
-        /// <param name="reply">The <see cref="PingReply"/> to format.</param>
-        /// <returns>The formatted IP address with appended host name.</returns>
-        private static string FormatAddress(PingReply reply)
-        {
-            var hostname = Dns.GetHostEntry(reply.Address).HostName.Replace(".Home", "");
-
-            var entry = $"{reply.Address} - {hostname}";
-
-            return entry;
-        }
-
-        /// <summary>
-        /// Constructs a list of all possible IP addresses within a given range. (last octet 0 to 255)
-        /// </summary>
-        /// <param name="range">The first three octets of an IP address.</param>
-        /// <returns>The IP address list.</returns>
-        private static List<IPAddress> ConstructAddresses(string range)
-        {
-            List<IPAddress> addresses = new();
-
-            for (int i = 0; i < 256; i++)
-            {
-                addresses.Add(IPAddress.Parse($"{range}.{i}"));
-            }
-
-            return addresses;
-        }
-
-        /// <summary>
-        /// Pings all given IP addresses and awaits a successful reply.
-        /// </summary>
-        /// <param name="ips">IP address list.</param>
-        /// <param name="timeout">Ping timeout.</param>
-        /// <returns>A list of successfully ping'd IP addresses.</returns>
-        public static async Task<List<PingReply>> PingAsync(List<IPAddress> ips, int timeout = 5000)
-        {
-            var pingTasks = ips.Select(async ip =>
-            {
-                using Ping ping = new();
-                return await ping.SendPingAsync(ip, timeout);
-            });
-
-            var results = await Task.WhenAll(pingTasks);
-
-            return results.Where(x => x.Status == IPStatus.Success).ToList();
         }
 
         /// <summary>
