@@ -16,6 +16,7 @@ namespace PingNet.ViewModels
         private readonly INetworkAnalyser _networkAnalyser;
         private ObservableCollection<string> _discoveredMachines = new();
         private bool _searching;
+        private int _numberOfDevicesFound;
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -75,6 +76,19 @@ namespace PingNet.ViewModels
         }
 
         /// <summary>
+        /// Gets the number of devices found.
+        /// </summary>
+        public int NumberOfDevicesFound
+        {
+            get => _numberOfDevicesFound;
+            set
+            {
+                _numberOfDevicesFound = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// Starts the discovery background worker.
         /// </summary>
         private async Task ExecuteDiscover()
@@ -84,7 +98,9 @@ namespace PingNet.ViewModels
             Searching = true;
 
             DiscoveredMachines = new ObservableCollection<string>(await _networkAnalyser.BroadcastAsync(IPAddressRange, 1000));
-            
+
+            NumberOfDevicesFound = DiscoveredMachines.Count;
+
             Searching = false;
         }
 

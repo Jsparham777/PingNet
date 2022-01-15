@@ -39,6 +39,15 @@
             <Run Text=".XXX"/>
         </TextBlock>
 
+        <TextBlock Grid.Row="0"
+                   HorizontalAlignment="Right"
+                   FontFamily="Consolas"
+                   Foreground="GhostWhite"
+                   FontWeight="Regular">
+            <Run Text="Number of devices found: "/>
+            <Run Text="{Binding NumberOfDevicesFound}"/>
+        </TextBlock>
+
         <ListView x:Name="ListViewAddresses" 
                   Grid.Row="1" 
                   Height="auto"
