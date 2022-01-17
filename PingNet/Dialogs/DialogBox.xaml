@@ -1,0 +1,74 @@
+﻿<Window x:Class="PingNet.Dialogs.DialogBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:PingNet.ValueConverters"
+        mc:Ignorable="d"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="NoResize"
+        Background="{DynamicResource TitleBarBackgroundBrush}"
+        WindowStartupLocation="CenterScreen"
+        Title="{Binding Title, FallbackValue='WARNING'}" 
+        Height="160" 
+        Width="400">
+    
+    <Grid Margin="15">
+        <Grid.Resources>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverters"/>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextForegroundBrush}"/>
+                <Setter Property="FontWeight" Value="Light"/>
+            </Style>
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+
+        <Image Source="/Images/warning.png" 
+               Width="42" 
+               Height="42"
+               HorizontalAlignment="Center"
+               Grid.RowSpan="2"
+               Margin="0 15 10 0" />
+
+        <TextBlock Name="TextBlockCaption"
+                   Grid.Column="1"
+                   Grid.Row="1"
+                   TextWrapping="Wrap"
+                   Text="{Binding Caption, FallbackValue='Make a copy of the result folder before analysing?'}"/>
+
+        <WrapPanel Grid.Row="2" 
+                   Grid.ColumnSpan="2" 
+                   HorizontalAlignment="Right" 
+                   Margin="0,10,0,0">
+
+            <Button Name="ButtonYes"
+                    IsDefault="True"                     
+                    Style="{DynamicResource TitleBarCloseButtonStyle}"                    
+                    Width="100" 
+                    FontSize="15"
+                    Height="20"
+                    Margin="0 0 10 0"
+                    Content="{Binding OkButtonText, FallbackValue='Yes'}"
+                    Click="ButtonOk_Click" />
+            
+            <Button Name="ButtonCancel"
+                    IsCancel="True"
+                    Style="{DynamicResource TitleBarCloseButtonStyle}"
+                    Visibility="{Binding ShowCancelButton, Converter={StaticResource BoolToVisibilityConverters}}"
+                    Width="100"
+                    FontSize="15"
+                    Height="20"
+                    Content="{Binding CancelButtonText, FallbackValue='No'}" 
+                    Click="ButtonCancel_Click"/>
+        </WrapPanel>
+    </Grid>
+</Window>

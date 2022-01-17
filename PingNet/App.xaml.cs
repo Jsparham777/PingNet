@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PingNet.Dialogs;
 using PingNet.Services;
 using PingNet.ViewModels;
 using System;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace PingNet
 {
@@ -88,6 +90,19 @@ namespace PingNet
                 await _host.StopAsync(TimeSpan.FromSeconds(5));
             }
             base.OnExit(e);
+        }
+
+        /// <summary>
+        /// Global exception handler
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="DispatcherUnhandledExceptionEventArgs"/> instance containing the event data.</param>
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            DialogBox dialogBox = new DialogBox("Error", e.Exception.Message, true);
+
+            if (dialogBox.ShowDialog() == false)
+                e.Handled = true;
         }
     }
 }

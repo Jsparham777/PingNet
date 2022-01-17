@@ -1,0 +1,41 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--Dictionary containing all application colour brushes-->
+
+    <!--Title Bar Background Brush-->
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#FF2D2D30"/>
+
+    <!--Title bar maximise/minimise/restore button background brushes-->
+    <SolidColorBrush x:Key="MouseOverOverlayBackgroundBrush" Color="#FF3F3F46"/>
+    <SolidColorBrush x:Key="MouseOverWindowButtonForegroundBrush" Color="#FFF0EFF1"/>
+    <SolidColorBrush x:Key="PressedOverlayBackgroundBrush" Color="#FF007ACC"/>
+
+    <!--Title bar close button background brushes-->
+    <SolidColorBrush x:Key="MouseOverWindowCloseButtonBackgroundBrush" Color="#FF3F3F46"/>
+    <SolidColorBrush x:Key="MouseOverWindowCloseButtonForegroundBrush" Color="#FFF0EFF1"/>
+    <SolidColorBrush x:Key="PressedWindowCloseButtonBackgroundBrush" Color="#FF007ACC"/>
+
+    <!--Listbox colours-->
+    <SolidColorBrush x:Key="ListBoxBackgroundBrush" Color="#FF1E1E1E"/>
+    <SolidColorBrush x:Key="ListBoxForegroundBrush" Color="#FFF0EFF1"/>
+
+    <!--Text colours-->
+    <SolidColorBrush x:Key="TextForegroundBrush" Color="#FFF0EFF1"/>
+
+
+    <!--User Control Background Image-->
+    <Image x:Key="BackgroundImage"
+           Source="/Images/MATLAB.jpg"
+           SnapsToDevicePixels="True"
+           RenderOptions.BitmapScalingMode="HighQuality">
+        <Image.OpacityMask>
+            <LinearGradientBrush StartPoint="0,0.5" EndPoint="1.5, 0.5">
+                <GradientStop Offset="0.0" Color="#00000000"/>
+                <GradientStop Offset="1.0" Color="#FF000000"/>
+            </LinearGradientBrush>
+        </Image.OpacityMask>
+    </Image>
+    <VisualBrush x:Key="BrushBackgroundImage" Visual="{StaticResource BackgroundImage}"/> 
+
+</ResourceDictionary>

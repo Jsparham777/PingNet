@@ -1,13 +1,15 @@
 ﻿<Application x:Class="PingNet.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:PingNet">
+             DispatcherUnhandledException="OnDispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
             <vm:ViewModelLocator xmlns:vm="clr-namespace:PingNet.ViewModels" x:Key="Locator"/>
 
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Colours.xaml"/>
                 <ResourceDictionary Source="Styles/Windows.xaml"/>
+                <ResourceDictionary Source="Styles/Buttons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
         </ResourceDictionary>
