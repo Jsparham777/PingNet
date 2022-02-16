@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -6,8 +7,22 @@ using System.Threading.Tasks;
 
 namespace PingNet.Services
 {
+    /// <summary>
+    /// Contains methods for analysing a network.
+    /// </summary>
     public class NetworkAnalyser : INetworkAnalyser
     {
+        private readonly ILogger<NetworkAnalyser> _logger;
+
+        /// <summary>
+        /// Instantiates a new instance of the <see cref="NetworkAnalyser"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public NetworkAnalyser(ILogger<NetworkAnalyser> logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Pings all IP addresses within a given range and adds the connected machines to the <see cref="DiscoveredMachines"/> collection.
         /// </summary>
@@ -19,6 +34,7 @@ namespace PingNet.Services
 
             var addresses = ConstructAddresses(ipAddressRange);
 
+            _logger.LogInformation("Broadcasting");
             var replies = await PingAsync(addresses, timeout);
 
             foreach (var reply in replies)

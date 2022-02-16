@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PingNet.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -13,6 +14,7 @@ namespace PingNet.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly AppSettings _options;
+        private readonly ILogger _logger;
         private readonly INetworkAnalyser _networkAnalyser;
         private ObservableCollection<string> _discoveredMachines = new();
         private bool _searching;
@@ -22,10 +24,13 @@ namespace PingNet.ViewModels
         /// Instantiates a new instance of the <see cref="MainWindowViewModel"/> class.
         /// </summary>
         /// <param name="options">Options read from the appsettings.json file.</param>
-        public MainWindowViewModel(IOptions<AppSettings> options, INetworkAnalyser networkAnalyser)
+        /// <param name="logger"></param>
+        /// <param name="networkAnalyser"></param>
+        public MainWindowViewModel(IOptions<AppSettings> options, ILogger<MainWindowViewModel> logger, INetworkAnalyser networkAnalyser)
         {
             _options = options.Value;
             IPAddressRange = _options.IPAddressRange;
+            _logger = logger;
             _networkAnalyser = networkAnalyser;
         }
 
@@ -37,7 +42,7 @@ namespace PingNet.ViewModels
         /// <summary>
         /// Connect command.
         /// </summary>
-        public static RelayCommand Connect => new(x => ExecuteConnect(x));
+        public RelayCommand Connect => new(x => ExecuteConnect(x));
 
         /// <summary>
         /// Browse command.
@@ -98,6 +103,8 @@ namespace PingNet.ViewModels
         /// </summary>
         private async Task ExecuteDiscover()
         {
+            _logger.LogInformation("Discovering machines");
+
             DiscoveredMachines.Clear();
 
             Searching = true;
@@ -106,6 +113,10 @@ namespace PingNet.ViewModels
 
             NumberOfDevicesFound = DiscoveredMachines.Count;
 
+            _logger.LogInformation("Discovered {count} machines", NumberOfDevicesFound);
+            foreach(var machine in DiscoveredMachines)
+                _logger.LogInformation("{machine}", machine);
+
             Searching = false;
         }
 
@@ -113,11 +124,12 @@ namespace PingNet.ViewModels
         /// Starts the RDP session in full screen mode.
         /// </summary>
         /// <param name="parameter">The hostname and IP address.</param>
-        private static void ExecuteConnect(object parameter)
+        private void ExecuteConnect(object parameter)
         {
             string entry = parameter as string;
             string ip = entry.Split(" - ")[0];
 
+            _logger.LogInformation("Connecting to {entry}", entry);
             _ = Process.Start(new ProcessStartInfo("mstsc", $"/f /v:{ip}"));
         }
 
@@ -130,6 +142,7 @@ namespace PingNet.ViewModels
             string entry = parameter as string;
             string ip = entry.Split(" - ")[0];
 
+            _logger.LogInformation("Browsing to {entry}", entry);
             Process.Start(_options.BrowserPath, $"http://{ip}");
         }
     }

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Hosting;
 using PingNet.Dialogs;
 using PingNet.Services;
 using PingNet.ViewModels;
+using Serilog;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -15,6 +17,7 @@ namespace PingNet
     /// </summary>
     public partial class App : Application
     {
+        private readonly ILogger _logger;
         private readonly IHost _host;
 
         /// <summary>
@@ -32,15 +35,23 @@ namespace PingNet
         /// </summary>
         public App()
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            _logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
+
+            _logger.Information("Configuring host");
+
             _host = Host.CreateDefaultBuilder()
                .ConfigureServices((context, services) =>
                {
                    ConfigureServices(context.Configuration, services);
                })
-               .ConfigureLogging(logging =>
-               {
-                   //TODO: Add logger here
-               })
+               .UseSerilog(_logger) //TODO: NOT LOGGING VIEWMODEL INFORMATION?!?!?!
                .Build();
 
             ServiceProvider = _host.Services;
@@ -56,6 +67,7 @@ namespace PingNet
             services.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)));
 
             //Register services
+            //services.AddSingleton(_logger);
             services.AddSingleton<INetworkAnalyser, NetworkAnalyser>();
 
             //Register viewmodels
